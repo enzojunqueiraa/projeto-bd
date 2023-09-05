@@ -9,73 +9,129 @@ use Illuminate\Support\Facades\Hash;
 
 class UsuarioController extends Controller
 {
-    public function store(UsuarioRequest $request){
+    public function store(UsuarioRequest $request)
+    {
         $usuario = Usuario::create([
-            'nome' => $request ->nome,
-            'cpf' => $request ->cpf,
-            'celular' => $request ->celular,
-            'email' => $request ->email,
+            'nome' => $request->nome,
+            'cpf' => $request->cpf,
+            'celular' => $request->celular,
+            'email' => $request->email,
             'password' => Hash::make($request->password)
-        ]); 
+        ]);
         return response()->json([
-            "success" =>true,
+            "success" => true,
             "message" => "Registred User",
-            "data"=> $usuario
-        ],200);
+            "data" => $usuario
+        ], 200);
     }
 
-    public function pesquisarporId($id){
+    public function pesquisarporId($id)
+    {
         $usuario = Usuario::find($id);
 
-        if($usuario == null){
+        if ($usuario == null) {
             return response()->json([
                 'status' => false,
                 'message' => "Usuário não encontrado"
             ]);
         }
         return response()->json([
-            'status'=>true,
-            'data'=> $usuario
+            'status' => true,
+            'data' => $usuario
         ]);
     }
 
 
-        public function pesquisarPorCpf($cpf){
+    public function pesquisarPorCpf($cpf)
+    {
         $usuario = Usuario::where('cpf', '=', $cpf)->first();
         return response()->json([
-            'status'=>true,
-            'data'=> $usuario
+            'status' => true,
+            'data' => $usuario
         ]);
     }
 
-    public function retornarTodos(){
+    public function retornarTodos()
+    {
         $usuarios = Usuario::all();
         return response()->json([
-            'status'=>true,
-            'data'=> $usuarios
+            'status' => true,
+            'data' => $usuarios
         ]);
-
     }
 
 
-    public function pesquisarPorNome(Request $request){
-        $usuarios = Usuario::where('nome', 'like', '%'. $request->nome . '%' )->get();
-        
-        if(count($usuarios) > 0){
-        
+    public function pesquisarPorNome(Request $request)
+    {
+        $usuarios = Usuario::where('nome', 'like', '%' . $request->nome . '%')->get();
+
+        if (count($usuarios) > 0) {
+
+
+            return response()->json([
+                'status' => true,
+                'data' => $usuarios
+            ]);
+        }
 
         return response()->json([
-            'status'=>true,
-            'data'=> $usuarios 
+            'status' => false,
+            'message' => 'Não há resultados para pesquisa'
         ]);
-        
-
     }
 
-    return response()->json([
-        'status'=> false,
-        'message' => 'Não há resultados para pesquisa'
-    ]);
+    public function excluir($id)
+    {
+        $usuario = Usuario::find($id);
 
-}
+        if (!isset($usuario)) {
+            return response()->json([
+                'status' => false,
+                'message' => "Usuário não encontrado"
+            ]);
+        }
+
+        $usuario->delete();
+        return response()->json([
+            'status' => true,
+            'message' => "Usuário excluído com sucesso"
+        ]);
+    }
+
+
+    public function update(Request $request)
+    {
+        $usuario = Usuario::find($request->id);
+        if(!isset($usuario)){
+        return response()->json([
+            'status' => false,
+            'message' => 'Usuário não encontrado'
+        ]);
+    }
+
+        if (isset($request->email)) {
+            $usuario->email = $request->email;
+        }
+
+
+        if (isset($request->nome)) {
+            $usuario->nome = $request->nome;
+        }
+
+        if (isset($request->cpf)) {
+            $usuario->cpf = $request->cpf;
+        }
+
+        if (isset($request->celular)) {
+            $usuario->celular = $request->celular;
+        }
+
+
+        $usuario->update();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Usuário atualizado'
+        ]);
+    }
 }
