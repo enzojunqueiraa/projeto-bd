@@ -6,6 +6,8 @@ use App\Http\Requests\UsuarioRequest;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Response;
+
 
 class UsuarioController extends Controller
 {
@@ -134,4 +136,39 @@ class UsuarioController extends Controller
             'message' => 'Usuário atualizado'
         ]);
     }
+
+
+
+    public function exportarCsv(){
+
+            $usuarios = Usuario::all();
+           
+            $nomeArquivo = 'usuarios.csv';
+
+            $filePath = storage_path('app/public/' . $nomeArquivo);
+
+            $handle = fopen($filePath, "w");
+
+            fputcsv($handle, array('Nome', 'Email', 'CPF', 'Celular'), ';');
+
+            foreach($usuarios as $u){
+                fputcsv($handle, array(
+                    $u->nome,
+                    $u->email,
+                    $u->cpf,
+                    $u->celular
+                ), ';');
+            }
+            
+            fclose($handle);
+
+            return Response::download(public_path().'/storage/'. $nomeArquivo)->deleteFileAfterSend(true);
+
+    }
+
+
+
+
+
+
 }
